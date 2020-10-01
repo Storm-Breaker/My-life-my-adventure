@@ -2,10 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev" : "npx nodemon app.js"
+    "dev": "npx nodemon app.js"
   },
   "keywords": [],
   "author": "storm breaker",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4",
     "sequelize-cli": "^6.2.0"
   }
 }

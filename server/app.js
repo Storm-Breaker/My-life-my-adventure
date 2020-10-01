@@ -1,4 +1,4 @@
-const errorHandler = require ('./middleware/errorHandler')
+const errorHandler = require ('./middlewares/errorHandler')
 const express = require ('express')
 const router = require ('./routes')
 const app = express()

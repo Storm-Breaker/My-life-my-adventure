@@ -14,10 +14,67 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Todo.init({
-    title: DataTypes.STRING,
-    location: DataTypes.STRING,
-    due_date: DataTypes.DATE,
-    weather: DataTypes.STRING,
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid title'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid title'
+        }
+      }
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid location'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid location'
+        }
+      }
+    } ,
+    due_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid date'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid date'
+        },
+        isToday(value){
+          if (value < new Date()){
+            throw 'invali date'
+          }
+        }
+      }
+    },
+    weather: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid weather'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid weather'
+        }
+      }
+    },
     UserId: DataTypes.INTEGER
   }, {
     sequelize,
