@@ -1,31 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avonturir</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-<link rel="stylesheet" href="https://bootswatch.com/4/united/bootstrap.min.css">
-<link rel="stylesheet" href="/asset/style.css">
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://bootswatch.com/4/united/bootstrap.min.css">
+    <link rel="stylesheet" href="./asset/style.css">
 </head>
-<body>
-    
-        <!-- Login Form -->
-        <div class="container outside">
-            <div class="row my-5">
-                <form id="login" class="col-6 mx-auto text-center border py-5">
-                    <label for="email">Email</label><br>
-                    <input type="text" name="email" id="email" placeholder="Ex. Someone@mail.com"> <br>
-                    <small id="email" class="form-text text-muted">We'll never share your email with anyone else.</small>
-                    <label for="password">Password</label><br>
-                    <input type="password" name="password" id="password" placeholder="Password"> <br> <br>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-            </div>
-        </div>
 
-        
+<body>
+    <!-- Navbar -->
+    <div class="container-nav">
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="#">Avonturir</a>
+
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav mr-auto">
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- not yet -->
+                    <li class="nav-item active">
+                        <a class="nav-link outside" href="#" data-toggle="modal" data-target="#modalSignup">Signup</a>
+                    </li>
+                    <!-- not yet -->
+                    <li class="nav-item active">
+                        <a class="nav-link outside" href="#" data-toggle="modal" data-target="#signinModal">Signin</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link inside" href="#" style="display:none" id="logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+
+    </div>
+    <!-- Login Form -->
+    <div class="container outside">
+        <div class="row my-5">
+            <form id="login" class="col-6 mx-auto text-center border py-5">
+                <label for="email">Email</label><br>
+                <input type="text" name="email" id="email" placeholder="Ex. Someone@mail.com"> <br>
+                <small id="email" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                <label for="password">Password</label><br>
+                <input type="password" name="password" id="password" placeholder="Password"> <br> <br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+    <!-- Main Page -->
+    <div class="container inside">
+        <div class="row my-5">
+            <h1>My Plan.net</h1>
+        <br>
+        <table id="plan"></table>
+        </div>
+    </div>
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -38,7 +77,94 @@
     <script>
         const baseUrl = `http://localhost:3000`
 
-        $(document)
+        function showMainPage() {
+            $(".inside").show()
+            $(".outside").hide()
+        }
+        function showLogin() {
+            $(".inside").hide()
+            $(".outside").show()
+        }
+
+        function deletePlan(id) {
+            $.ajax(`${baseURL}/plans/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    access_token: localStorage.getItem("access_token")
+                }
+            })
+                .done(response => {
+                    fetchPlan()
+                })
+                .fail(err => {
+                    console.log(err)
+                })
+        }
+
+        function makePlan(){ //not done yet
+            $.ajax(`${baseUrl}/plans/`,{
+                method: `POST`,
+                headers: {
+
+                }
+            })
+        }
+
+        function fetchPlan(){ //not done yet
+            $.ajax(`${baseUrl}/plans/`,{
+                method: `GET`,
+                headers: {
+                    access_token: localStorage.getItem("access_token")
+                }
+            })
+            .done(response=>{
+                response.plan.forEach(e=>[
+
+                ])
+            })
+        }
+
+        $(document).ready(()=>{
+            if (localStorage.getItem("access_token")){
+                showMainPage()
+            }else{
+                showLogin()
+            }
+
+            $("#login").on("submit", function (e) {
+                e.preventDefault()
+                const email = $("#email").val()
+                const password = $("#password").val()
+                //disini request server
+                $.ajax(`${baseURL}/users`, {
+                    method: 'POST',
+                    data: {
+                        email,
+                        password
+                    }
+                })
+                    .done(response => {
+                        localStorage.setItem("access_token", response.access_token)
+                        fetchTodos()
+                        $(".inside").show()
+                        $(".outside").hide()
+                    })
+                    .fail(err => {
+                        console.log(err)
+                    })
+                    .always(_ => {
+                        $("#login").trigger("reset")
+                    })
+            })
+
+            $("#logout").on("click", function () {
+                $(".inside").hide()
+                $(".outside").show()
+                localStorage.clear()
+                // localStorage.removeItem("access_token")
+            })
+        })
     </script>
 </body>
+
 </html>
