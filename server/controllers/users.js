@@ -1,4 +1,6 @@
 const { User } = require ('../models')
+const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 class UserController {
     static async register (req, res, next){

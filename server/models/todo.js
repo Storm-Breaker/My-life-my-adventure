@@ -10,28 +10,71 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Todo.belongsTo(models.User)
+      
     }
   };
   Todo.init({
     title: {
       type: DataTypes.STRING,
-      validate : {
-        notEmpty : true
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid title'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid title'
+        }
       }
     },
-    location: DataTypes.STRING,
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid location'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid location'
+        }
+      }
+    } ,
     due_date: {
       type: DataTypes.DATE,
+      allowNull: false,
       validate: {
-        isValid (value){
+        notEmpty: {
+          args: true,
+          msg: 'invalid date'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid date'
+        },
+        isToday(value){
           if (value < new Date()){
-            throw new Error (`tanggal tidak valid`)
+            throw 'invali date'
           }
         }
       }
     },
-    weather: DataTypes.STRING,
+    weather: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          args: true,
+          msg: 'invalid weather'
+        },
+        notNull: {
+          args: true,
+          msg: 'invalid weather'
+        }
+      }
+    },
     status: DataTypes.STRING,
     UserId: DataTypes.INTEGER
   }, {

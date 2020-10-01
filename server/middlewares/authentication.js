@@ -3,7 +3,7 @@ const { User } = require ('../models')
 
 function authentication (req, res, next){
     const currentToken = req.headers.access_token
-    var decoded = jwt.verify(currentToken, process.env.JWT_SECRET, (err, decoded) =>{
+    const decoded = jwt.verify(currentToken, process.env.JWT_SECRET, (err, decoded) =>{
         if (err){
             next({
                 name: `unauthorized user`
@@ -30,3 +30,5 @@ function authentication (req, res, next){
 
     })
 }
+
+module.exports = authentication
