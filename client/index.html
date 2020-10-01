@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    <button id="profile-page">profile</button>
     <!-- Navbar -->
     <div class="container-nav">
 
@@ -74,6 +75,38 @@
         <table id="todo" style="border-collapse: collapse;width: 70px;position: relative;left: 100px;"></table>
     </div>
 
+    <!-- create-page -->
+    <div class="create-todo">
+        <h1>Created Todo</h1>
+        <form>
+            <label for="title">Title</label><br>
+            <input type="text" id="title"><br><br>
+            <label for="location"></label><br>
+            <input type="location" id="location"><br><br>
+            <label for="due_date">Due Date</label><br>
+            <input type="date" id="due_date"><br><br>
+        </form>
+    </div>
+
+    <!-- edit-page -->
+    <div class="edit-todo">
+        <h1>Edit Your Todo</h1>
+        <form id="edit-page">
+            <label for="edit-title">Title</label><br>
+            <input type="text" id="edit-title"><br><br>
+            <label for="edit-location"></label><br>
+            <input type="location" id="edit-location"><br><br>
+            <label for="edit-due_date">Due Date</label><br>
+            <input type="date" id="edit-due_date"><br><br>
+            <input type="submit" val>
+        </form>
+    </div>
+
+    <!-- profile-page -->
+    <div class="profile-page">
+
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -84,6 +117,8 @@
 
     <script>
         const baseUrl = `http://localhost:3000`
+        let penampungId 
+
         function fetchRead() {
             $.ajax(`${baseURL}/....`, {
                 method: 'GET',
@@ -117,6 +152,7 @@
             $(".inside").show()
             $(".outside").hide()
         }
+        
         function showLogin() {
             $(".inside").hide()
             $(".outside").show()
@@ -146,6 +182,32 @@
             })
         }
 
+
+        function editTodo (id){
+            $("#login").hide()
+            $("#register").hide()
+            $("#todo").hide()
+            $('.create-todo').hide()
+            $('.edit-todo').show()
+            penampungId = id
+
+            $.ajax(`${baseUrl}/edit/${id}`, {
+                method : 'GET',
+                headers : {
+                    access_token : localStorage.getItem('access_token')
+                }
+            })
+            .done(result => {
+                localStorage.setItem('current_id', result.todo.id)
+                $("#edit-title").val(result.todo.title)
+                $("#edit-due_date").val(formatDate(result.todo.due_date))
+                $("#edit-location").val(result.todo.location)
+            })
+            .fail(err => {
+                throw err
+            })
+        }
+
         $(document).ready(function () {
             if (!localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
                 $("#login").show()
@@ -162,6 +224,7 @@
                 $("#todo").show()
             }
 
+
             $("#to-register").on("click", function () {
                 $("#login").hide()
                 $("#register").show()
@@ -175,22 +238,26 @@
                 const lastName = $("#lastName").val()
                 const email = $("#emailReg").val()
                 const password = $("#passwordReg").val()
+
+
                 $.ajax(`${baseURL}/register`, {
                     method: 'POST',
                     data: {
                         firstName,
                         lastName,
                     }
-                        .done(function (res) {
-                            localStorage.removeItem("register_key")
-                            $("#login").show()
-                            $("#register").hide()
-                            $("#todo").hide()
-                        })
-                        .fail(function (err) {
-                            console.log(err)
-                        })
                 })
+                .done(function (res) {
+                    localStorage.removeItem("register_key")
+                    $("#login").show()
+                    $("#register").hide()
+                    $("#todo").hide()
+                })
+                .fail(function (err) {
+                    console.log(err)
+                })
+              })
+  
                 $("#login").on("submit", function (e) {
                     e.preventDefault()
                     const email = $("#email").val()
@@ -217,6 +284,7 @@
                         })
                 })
 
+
                 $("#logout").on("click", function () {
                     $(".inside").hide()
                     $(".outside").show()
@@ -224,8 +292,34 @@
                     // localStorage.removeItem("access_token")
                 })
             })
-        })
-    </script>
-</body>
 
+
+            $('.edit_todo').on('submit', (event) => {
+                event.preventDefault
+                $('#edit-page').trigger('reset')
+                $.ajax(`${baseServer}/todos/${penampungId}`, {
+                    method : 'POST',
+                    headers : {
+                        access_token : localStorage.getItem('access_token')
+                    },
+                    data : {
+                        title: $('#title').val(),
+                        due_date: $('#due_date').val(),
+                        location: $('#location').val()
+                    }
+                })
+                .done(result => {
+                    fetchTodo()
+                })
+                .fail(err => {
+                    console.log(err)
+                })
+            })
+
+        })
+        })
+
+    </script>
+
+</body>
 </html>
