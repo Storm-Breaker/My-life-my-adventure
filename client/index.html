@@ -154,6 +154,7 @@
                 }
             })
         }
+        
         $(document).ready(function(){
             if(!localStorage.getItem('access_token') && !localStorage.getItem('register_key')){
                 $("#login").show()
@@ -169,13 +170,14 @@
                 $("#register").hide()
                 $("#todo").show()
             }
+        
             $("#to-register").on("click",function (){
                 $("#login").hide()
                 $("#register").show()
                 $("#todo").hide()
                 localStorage.setItem("register_key","register")
             })
-            
+        
             $("#register").on("submit",function(e){
                 e.preventDefault()
                 const firstName = $("#firstName").val()
@@ -197,8 +199,8 @@
                 .fail(function(err){
                     console.log(err)
                 })
-
-                $("#login").on("submit", function (e) {
+            })    
+            $("#login").on("submit",function (e) {
                 e.preventDefault()
                 const email = $("#email").val()
                 const password = $("#password").val()
@@ -230,7 +232,8 @@
                 localStorage.clear()
                 // localStorage.removeItem("access_token")
             })
-        }
+        })
+        })
     </script>
 </body>
 
