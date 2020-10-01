@@ -20,6 +20,9 @@ module.exports = {
       weather: {
         type: Sequelize.STRING
       },
+      status: {
+        type: Sequelize.STRING
+      },
       UserId: {
         type: Sequelize.INTEGER
       },
