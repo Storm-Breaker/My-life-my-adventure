@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      
     }
   };
   Todo.init({
@@ -75,6 +75,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
+    status: DataTypes.STRING,
     UserId: DataTypes.INTEGER
   }, {
     sequelize,
