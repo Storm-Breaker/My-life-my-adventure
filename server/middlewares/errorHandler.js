@@ -7,6 +7,9 @@ function errorHandler (err, req, res, next){
     } else if (err.name === 'unauthorized user'){
         res.status(401).json({msg : `${err.name}`})
     }
+    else if (err.name === 'not found'){
+        res.status(404).json({msg:err.name})
+    }
     else {
         res.status (500).json(err)
     }

@@ -25,7 +25,7 @@ class App{
                 weather: req.body.weather,
                 status: req.body.status
             }, {where : {id}})
-            console.log(todo)
+            
             res.status(200).json({todo})
         } catch (error) {
             next(error)
@@ -61,6 +61,23 @@ class App{
                 status : req.body.status
             })
             res.status(200).json({todo})
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async getEdit(req, res, next){
+
+        const id = req.params.id
+
+        try {
+            const apps = Todo.findByPk(id)
+            if (app === null){
+                throw{
+                    name: 'not found'
+                }
+            }
+            res.status(200).json({apps})
         } catch (error) {
             next(error)
         }
