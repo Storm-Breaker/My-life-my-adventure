@@ -53,18 +53,35 @@
         </div>
     </div>
 
-
-
-
     <!-- Main Page -->
     <div class="container inside">
         <div class="row my-5">
             <h1>My Plan.net</h1>
-        <br>
-        <table id="plan"></table>
+            <br>
+            <table id="plan"></table>
         </div>
     </div>
 
+    <!-- Register Form -->
+    <div class="container outside">
+        <div class="row my-5">
+            <form id="register" class="col-6 mx-auto text-center border py-5">
+                <label for="firt name">First Name</label><br>
+                <input type="text" name="firstName" id="firstName" placeholder="Your first name"> <br>
+                <label for="last name">Last Name</label><br>
+                <input type="text" name="lastName" id="lastName" placeholder="Your last name"> <br>
+                <label for="email">Email</label><br>
+                <input type="text" name="email" id="emailReg" placeholder="Your email"> <br>
+                <label for="password">Password</label><br>
+                <input type="password" name="password" id="passwordReg" placeholder="Your Password"> <br> <br>
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+        </div>
+    </div>
+    <!-- Read Form -->
+    <div>
+        <table id="todo" style="border-collapse: collapse;width: 70px;position: relative;left: 100px;"></table>
+    </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -76,6 +93,34 @@
 
     <script>
         const baseUrl = `http://localhost:3000`
+        function fetchRead() {
+            $.ajax(`${baseURL}/....`, {
+                method: 'GET',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
+            })
+                .done(res => {
+                    $("#todo").empty()
+                    $("#todo").append(`<tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Activity</th>
+                <th>Weather</th>
+                </tr>`)
+                    res.forEach((el) => {
+                        $("#todo").append(`<tr>
+                    <td>${el.location}</td>
+                    <td>${el.date}</td>
+                    <td>${el.activity}</td>
+                    <td>${el.weather}</td>
+                    </tr>`)
+                    })
+                })
+                .fail(err => {
+                    console.log(err)
+                })
+        }
 
         function showMainPage() {
             $(".inside").show()
@@ -101,49 +146,71 @@
                 })
         }
 
-        function makePlan(){ //not done yet
-            $.ajax(`${baseUrl}/plans/`,{
+        function createPlan() { //not done yet
+            $.ajax(`${baseUrl}/plans/`, {
                 method: `POST`,
                 headers: {
 
                 }
             })
         }
-
-        function fetchPlan(){ //not done yet
-            $.ajax(`${baseUrl}/plans/`,{
-                method: `GET`,
-                headers: {
-                    access_token: localStorage.getItem("access_token")
-                }
-            })
-            .done(response=>{
-                response.plan.forEach(e=>[
-
-                ])
-            })
-        }
-
-        $(document).ready(()=>{
-            if (localStorage.getItem("access_token")){
-                showMainPage()
-            }else{
-                showLogin()
+        $(document).ready(function(){
+            if(!localStorage.getItem('access_token') && !localStorage.getItem('register_key')){
+                $("#login").show()
+                $("#register").hide()
+                $("#todo").hide()
+            }else if (!localStorage.getItem('access_token') && localStorage.getItem('register_key')){
+                $("#login").hide()
+                $("#register").show()
+                $("#todo").hide()
+            }else if(localStorage.getItem('access_token') && !localStorage.getItem('register_key')){
+                fetchRead()
+                $("#login").hide()
+                $("#register").hide()
+                $("#todo").show()
             }
+            $("#to-register").on("click",function (){
+                $("#login").hide()
+                $("#register").show()
+                $("#todo").hide()
+                localStorage.setItem("register_key","register")
+            })
+            
+            $("#register").on("submit",function(e){
+                e.preventDefault()
+                const firstName = $("#firstName").val()
+                const lastName = $("#lastName").val()
+                const email = $("#emailReg").val()
+                const password = $("#passwordReg").val()
+                $.ajax(`${baseURL}/register`,{
+                    method: 'POST',
+                    data: {
+                        firstName,
+                        lastName,
+                    }
+                .done(function(res) {
+                    localStorage.removeItem("register_key")
+                    $("#login").show()
+                    $("#register").hide()
+                    $("#todo").hide()
+                })
+                .fail(function(err){
+                    console.log(err)
+                })
 
-            $("#login").on("submit", function (e) {
+                $("#login").on("submit", function (e) {
                 e.preventDefault()
                 const email = $("#email").val()
                 const password = $("#password").val()
                 //disini request server
                 $.ajax(`${baseURL}/users`, {
                     method: 'POST',
-                    data: {
+                    data: { 
                         email,
                         password
                     }
                 })
-                    .done(response => {
+                .done(response => {
                         localStorage.setItem("access_token", response.access_token)
                         fetchTodos()
                         $(".inside").show()
@@ -163,7 +230,7 @@
                 localStorage.clear()
                 // localStorage.removeItem("access_token")
             })
-        })
+        }
     </script>
 </body>
 

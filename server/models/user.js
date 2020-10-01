@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
 
     static associate(models) {
-      // define association here
+      User.hasMany(models.Todo)
     }
   };
   User.init({
@@ -46,6 +46,13 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    hooks :{
+      beforeCreate (user) {
+        const salt = bcryptjs.genSaltSync(10)
+        const hash = bcryptjs.hashSync(user.password, salt)
+        user.password = hash
+      }
+    }
   });
   return User;
 };
