@@ -21,7 +21,7 @@
                     <label for="password">Password</label><br>
                     <input type="password" name="password" id="password" placeholder="Password"> <br> <br>
                     <button type="submit" class="btn btn-primary">Submit</button>
-                    <small id="account" class="form-text text-muted">Didnt have account?</small><a href="#" style="font-size: smaller;color: rgb(4, 0, 255);">Register</a>
+                    <small id="account" class="form-text text-muted">Didnt have account?</small><a id="to-register" href="#" style="font-size: smaller;color: rgb(4, 0, 255);">Register</a>
                 </form>
             </div>
         </div>
@@ -34,15 +34,17 @@
                     <label for="last name">Last Name</label><br>
                     <input type="text" name="lastName" id="lastName" placeholder="Your last name"> <br>
                     <label for="email">Email</label><br>
-                    <input type="text" name="email" id="email" placeholder="Your email"> <br>
+                    <input type="text" name="email" id="emailReg" placeholder="Your email"> <br>
                     <label for="password">Password</label><br>
-                    <input type="password" name="password" id="password" placeholder="Your Password"> <br> <br>
+                    <input type="password" name="password" id="passwordReg" placeholder="Your Password"> <br> <br>
                     <button type="submit" class="btn btn-primary">Register</button>
                 </form>
             </div>
         </div>
-
-        
+        <!-- Read Form -->
+        <div>
+            <table id="todo" style="border-collapse: collapse;width: 70px;position: relative;left: 100px;"></table>
+        </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
@@ -54,8 +56,82 @@
 
     <script>
         const baseUrl = `http://localhost:3000`
+        function fetchRead(){
+            $.ajax(`${baseURL}/....`,{
+                method: 'GET',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
+            })
+            .done (res => {
+                $("#todo").empty()
+                $("#todo").append(`<tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Activity</th>
+                <th>Weather</th>
+                </tr>`)
+                res.forEach((el) => {
+                    $("#todo").append(`<tr>
+                    <td>${el.location}</td>
+                    <td>${el.date}</td>
+                    <td>${el.activity}</td>
+                    <td>${el.weather}</td>
+                    </tr>`)
+                })
+            })
+            .fail (err => {
+                console.log(err)
+            })
+        }
 
-        $(document)
+        $(document).ready(function(){
+            if(!localStorage.getItem('access_token') && !localStorage.getItem('register_key')){
+                $("#login").show()
+                $("#register").hide()
+                $("#todo").hide()
+            }else if (!localStorage.getItem('access_token') && localStorage.getItem('register_key')){
+                $("#login").hide()
+                $("#register").show()
+                $("#todo").hide()
+            }else if(localStorage.getItem('access_token') && !localStorage.getItem('register_key')){
+                fetchRead()
+                $("#login").hide()
+                $("#register").hide()
+                $("#todo").show()
+            }
+            $("#to-register").on("click",function (){
+                $("#login").hide()
+                $("#register").show()
+                $("#todo").hide()
+                localStorage.setItem("register_key","register")
+            })
+            $("#register").on("submit",function(e){
+                e.preventDefault()
+                const firstName = $("#firstName").val()
+                const lastName = $("#lastName").val()
+                const email = $("#emailReg").val()
+                const password = $("#passwordReg").val()
+                $.ajax(`${baseURL}/register`,{
+                    method: 'POST',
+                    data: {
+                        firstName,
+                        lastName,
+                        email,
+                        password
+                    }
+                })
+                .done(function(res) {
+                    localStorage.removeItem("register_key")
+                    $("#login").show()
+                    $("#register").hide()
+                    $("#todo").hide()
+                })
+                .fail(function(err){
+                    console.log(err)
+                })
+            })
+        })
     </script>
 </body>
 </html>
