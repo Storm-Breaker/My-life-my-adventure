@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id"
+        content="419148580155-l4a8am6ev1u521kdp14vjnuodvalob6m.apps.googleusercontent.com">
     <title>Avonturir</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -12,7 +14,6 @@
 </head>
 
 <body>
-    <button id="profile-page">profile</button>
     <!-- Navbar -->
     <div class="container-nav">
 
@@ -25,14 +26,23 @@
                 <ul class="navbar-nav">
                     <!-- not yet -->
                     <li class="nav-item active">
-                        <a class="nav-link outside" href="#" data-toggle="modal" data-target="#modalSignup">Signup</a>
+                        <a class="nav-link signup" href="#" data-toggle="modal" data-target="#modalSignup"
+                            id="signup">Signup</a>
                     </li>
                     <!-- not yet -->
                     <li class="nav-item active">
-                        <a class="nav-link outside" href="#" data-toggle="modal" data-target="#signinModal">Signin</a>
+                        <a class="nav-link Signin" href="#" data-toggle="modal" data-target="#signinModal"
+                            id="signin">Signin</a>
+                    </li>
+                    <li>
+                        <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link inside" href="#" style="display:none" id="logout">Logout</a>
+                        <a class="nav-link profile" href="#" data-toggle="modal" data-target="#signinModal"
+                            id="profile">Profile</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link logout" href="#" style="display:none" id="logout">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -40,8 +50,9 @@
         </nav>
 
     </div>
+
     <!-- Login Form -->
-    <div class="container outside">
+    <div class="container-outside">
         <div class="row my-5">
             <form id="login" class="col-6 mx-auto text-center border py-5">
                 <label for="email">Email</label><br>
@@ -49,13 +60,14 @@
                 <small id="email" class="form-text text-muted">We'll never share your email with anyone else.</small>
                 <label for="password">Password</label><br>
                 <input type="password" name="password" id="password" placeholder="Password"> <br> <br>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-login">Submit</button>
             </form>
         </div>
     </div>
 
+
     <!-- Register Form -->
-    <div class="container outside">
+    <div id="container register">
         <div class="row my-5">
             <form id="register" class="col-6 mx-auto text-center border py-5">
                 <label for="firt name">First Name</label><br>
@@ -65,14 +77,18 @@
                 <label for="email">Email</label><br>
                 <input type="text" name="email" id="emailReg" placeholder="Your email"> <br>
                 <label for="password">Password</label><br>
-                <input type="password" name="password" id="passwordReg" placeholder="Your Password"> <br> <br>
+                <input type="password" name="password" id="passwordReg" placeholder="Your Password"> <br>
+                <label for="password">Confirm Password</label><br>
+                <input type="password" name="confirm_password" id="confirm_passwordReg" placeholder="Your Password">
+                <br> <br>
                 <button type="submit" class="btn btn-primary">Register</button>
             </form>
         </div>
     </div>
     <!-- Read Form -->
     <div>
-        <table id="todo" style="border-collapse: collapse;width: 70px;position: relative;left: 100px;"></table>
+        <h1 id="plans-head"> Your Plans </h1>
+        <table id="todo" border="3px"></table>
     </div>
 
     <!-- create-page -->
@@ -94,19 +110,33 @@
         <form id="edit-page">
             <label for="edit-title">Title</label><br>
             <input type="text" id="edit-title"><br><br>
-            <label for="edit-location"></label><br>
-            <input type="location" id="edit-location"><br><br>
+            <label for="edit-location">Location</label><br>
+            <input type="text" id="edit-location"><br><br>
             <label for="edit-due_date">Due Date</label><br>
             <input type="date" id="edit-due_date"><br><br>
-            <input type="submit" val>
+            <input type="submit" id="edit-submit">
         </form>
     </div>
+
 
     <!-- profile-page -->
     <div class="profile-page">
 
     </div>
 
+    <div class="edit-profile">
+        <form id="edit-prof">
+            <label for="edit-firstName">First name</label><br>
+            <input type="text" id="edit-firstName"><br>
+            <label for="edit-lastName">Last Name</label><br>
+            <input type="text" id="edit-lastName"><br>
+            <label for="edit-birthDate">Date of Birth</label><br>
+            <input type="date" id="edit-birthDate"><br>
+            <input type="submit" id="editprof-submit">
+        </form>
+    </div>
+
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -117,29 +147,140 @@
 
     <script>
         const baseUrl = `http://localhost:3000`
-        let penampungId 
+        let penampungId
 
-        function fetchRead() {
-            $.ajax(`${baseURL}/....`, {
+        function onSignIn(googleUser) {
+            var id_token = googleUser.getAuthResponse().id_token
+            $.ajax({
+                url: `${baseUrl}/googleSignIn`,
+                method: "POST",
+                headers: {
+                    id_token: id_token
+                }
+            })
+                .done(response => {
+                    localStorage.setItem("token", response.token)
+                    fetchRead()
+                    $("#plans-head").show()
+                    $("#todo").show()
+                    $(".logout").show()
+                    $("#login").hide()
+                    $("#register").hide()
+                    $("#signup").hide()
+                    $("#Signin").hide()
+                    $(".create-todo").hide()
+                    $(".edit-todo").hide()
+                    $("#profile").show()
+                    $(".edit-profile").hide()
+                })
+
+                .catch(err => {
+                    console.log(err, "error")
+                })
+        }
+
+        function getUser() {
+            $(".edit-profile").hide()
+            $("#plans-head").hide()
+            $("#todo").hide()
+            $(".logout").hide()
+            $("#login").hide()
+            $("#register").hide()
+            $("#signup").hide()
+            $("#Signin").hide()
+            $(".create-todo").hide()
+            $(".edit-todo").hide()
+            $("#profile").hide()
+            $(".profile-page").empty()
+            $.ajax(`${baseUrl}/profile`, {
                 method: 'GET',
                 headers: {
                     access_token: localStorage.getItem('access_token')
                 }
             })
                 .done(res => {
+                    console.log(res)
+                    $("#signin").hide()
+                    $("#todo").empty()
+                    $(".profile-page").empty()
+                    $(".profile-page").append(`
+                <h1>Full Name</h1>  
+                <h3>${res.firstName} ${res.lastName}</h3>
+                <br><br>
+                <h1>Date of Birth</h1><br>
+                <h3>${getDate(`${res.birthDate}`)}</h3>
+                <br><br>
+                <button onclick="editProfile()">Edit Account</button>
+                <button>Delete Account</button>`)
+                })
+                .fail(err => {
+                    console.log(err)
+                })
+        }
+
+        function getDate(date) {
+            const monthArr = [``, `January`, `February`, `March`,
+                `April`, `May`, `June`, `July`,
+                `August`, `September`, `October`,
+                `November`, `December`
+            ]
+
+            var d = new Date(date),
+                month = monthArr[(d.getMonth() + 1)],
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [day, month, year].join('-');
+        }
+
+        function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2)
+                month = '0' + month;
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+
+        function fetchRead() {
+            $.ajax(`${baseUrl}/user`, {
+                method: 'GET',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
+            })
+                .done(res => {
+                    $("#signin").hide()
                     $("#todo").empty()
                     $("#todo").append(`<tr>
+                <th>Activity</th>
                 <th>Location</th>
                 <th>Date</th>
-                <th>Activity</th>
                 <th>Weather</th>
+                <th>Status</th>
+                <th>Actions</th>
                 </tr>`)
                     res.forEach((el) => {
                         $("#todo").append(`<tr>
+                    <td>${el.title}</td>
                     <td>${el.location}</td>
-                    <td>${el.date}</td>
-                    <td>${el.activity}</td>
+                    <td>${getDate(`${el.due_date}`)}</td>
                     <td>${el.weather}</td>
+                    <td>${el.status}</td>
+                    <td>
+                    <button onclick="editTodo(${el.id})">Edit</button>
+                    <button onclick="deletePlan(${el.id})">Delete</button>
+                    <button onclick="markAsComplete(${el.id})">Mark as Completed</button>
+                    </td>
                     </tr>`)
                     })
                 })
@@ -148,25 +289,24 @@
                 })
         }
 
-        function showMainPage() {
-            $(".inside").show()
-            $(".outside").hide()
-        }
-        
-        function showLogin() {
-            $(".inside").hide()
-            $(".outside").show()
-        }
-
         function deletePlan(id) {
-            $.ajax(`${baseURL}/plans/${id}`, {
+            $.ajax(`${baseUrl}/apps/${id}`, {
                 method: 'DELETE',
                 headers: {
                     access_token: localStorage.getItem("access_token")
                 }
             })
                 .done(response => {
-                    fetchPlan()
+                    fetchRead()
+                    $("#plans-head").show()
+                    $("#todo").show()
+                    $(".logout").show()
+                    $("#login").hide()
+                    $("#register").hide()
+                    $("#signup").hide()
+                    $("#signin").hide()
+                    $(".create-todo").hide()
+                    $(".edit-todo").hide()
                 })
                 .fail(err => {
                     console.log(err)
@@ -182,8 +322,8 @@
             })
         }
 
-
-        function editTodo (id){
+        function editTodo(id) {
+            $("#plans-head").hide()
             $("#login").hide()
             $("#register").hide()
             $("#todo").hide()
@@ -192,40 +332,123 @@
             penampungId = id
 
             $.ajax(`${baseUrl}/edit/${id}`, {
-                method : 'GET',
-                headers : {
-                    access_token : localStorage.getItem('access_token')
+                method: 'GET',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
                 }
             })
-            .done(result => {
-                localStorage.setItem('current_id', result.todo.id)
-                $("#edit-title").val(result.todo.title)
-                $("#edit-due_date").val(formatDate(result.todo.due_date))
-                $("#edit-location").val(result.todo.location)
+                .done(result => {
+                    console.log(result)
+                    localStorage.setItem('current_id', result.todo.id)
+                    $("#edit-title").val(result.todo.title)
+                    $("#edit-location").val(result.todo.location)
+                    $("#edit-due_date").val(formatDate(result.todo.due_date))
+                })
+                .fail(err => {
+                    throw err
+                })
+        }
+
+        function markAsComplete(id) {
+
+
+            $.ajax(`${baseUrl}/edit/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
             })
-            .fail(err => {
-                throw err
+                .done(result => {
+                    localStorage.removeItem('current_id', result.todo.id)
+                    fetchRead()
+                    $("#plans-head").show()
+                    $("#todo").show()
+                    $(".logout").show()
+                    $("#login").hide()
+                    $("#register").hide()
+                    $("#signup").hide()
+                    $("#signin").hide()
+                    $(".create-todo").hide()
+                    $(".edit-todo").hide()
+                })
+                .fail(err => {
+                    throw err
+                })
+        }
+
+        function editProfile() {
+            $('.edit-profile').show()
+            $('.profile-page').hide()
+            $("#plans-head").hide()
+            $("#todo").hide()
+            $(".logout").hide()
+            $("#login").hide()
+            $("#register").hide()
+            $("#signup").hide()
+            $("#Signin").hide()
+            $(".create-todo").hide()
+            $(".edit-todo").hide()
+            $("#profile").hide()
+            $.ajax(`${baseUrl}/profile`, {
+                method: 'GET',
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
             })
+                .done(res => {
+                    $("#signin").hide()
+                    $("#edit-firstName").val(res.firstName)
+                    $("#edit-lastName").val(res.lastName)
+                    $("#edit-birthDate").val(formatDate(res.birthDate))
+                })
+                .fail(err => {
+                    console.log(err)
+                })
         }
 
         $(document).ready(function () {
             if (!localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
+                $("#plans-head").hide()
+                $("#todo").hide()
+                $(".logout").hide()
+                $("#login").hide()
+                $("#register").hide()
+                $("#signup").show()
+                $("#signin").show()
+                $(".create-todo").hide()
+                $(".edit-todo").hide()
+                $("#profile").hide()
+                $(".edit-profile").hide()
+            } else if (!localStorage.getItem('access_token') && localStorage.getItem('register_key')) {
+                $('.container-inside').hide()
+                $('#register').show()
+                $('.create-todo').hide()
+                $('.edit-todo').hide()
+                $("#profile").hide()
+            } else if (localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
+                fetchRead()
+                $("#plans-head").show()
+                $("#todo").show()
+                $(".logout").show()
+                $("#login").hide()
+                $("#register").hide()
+                $("#signup").hide()
+                $("#Signin").hide()
+                $(".create-todo").hide()
+                $(".edit-todo").hide()
+                $("#profile").show()
+                $(".edit-profile").hide()
+            }
+
+            $(".Signin").on("click", function () {
                 $("#login").show()
                 $("#register").hide()
                 $("#todo").hide()
-            } else if (!localStorage.getItem('access_token') && localStorage.getItem('register_key')) {
-                $("#login").hide()
-                $("#register").show()
-                $("#todo").hide()
-            } else if (localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
-                fetchRead()
-                $("#login").hide()
-                $("#register").hide()
-                $("#todo").show()
-            }
+                localStorage.removeItem("register_key")
+            })
 
-
-            $("#to-register").on("click", function () {
+            $("#signup").on("click", function () {
+                $("#plans-head").hide()
                 $("#login").hide()
                 $("#register").show()
                 $("#todo").hide()
@@ -238,88 +461,156 @@
                 const lastName = $("#lastName").val()
                 const email = $("#emailReg").val()
                 const password = $("#passwordReg").val()
+                const confirm_password = $("#confirm_passwordReg").val()
 
-
-                $.ajax(`${baseURL}/register`, {
+                $.ajax(`${baseUrl}/register`, {
                     method: 'POST',
                     data: {
                         firstName,
                         lastName,
+                        email,
+                        password,
+                        confirm_password
                     }
                 })
-                .done(function (res) {
-                    localStorage.removeItem("register_key")
-                    $("#login").show()
-                    $("#register").hide()
-                    $("#todo").hide()
-                })
-                .fail(function (err) {
-                    console.log(err)
-                })
-              })
-  
-                $("#login").on("submit", function (e) {
-                    e.preventDefault()
-                    const email = $("#email").val()
-                    const password = $("#password").val()
-                    //disini request server
-                    $.ajax(`${baseURL}/users`, {
-                        method: 'POST',
-                        data: {
-                            email,
-                            password
-                        }
+                    .done(function (res) {
+                        localStorage.removeItem("register_key")
+                        $("#login").show()
+                        $("#register").hide()
+                        $("#todo").hide()
                     })
-                        .done(response => {
-                            localStorage.setItem("access_token", response.access_token)
-                            fetchTodos()
-                            $(".inside").show()
-                            $(".outside").hide()
-                        })
-                        .fail(err => {
-                            console.log(err)
-                        })
-                        .always(_ => {
-                            $("#login").trigger("reset")
-                        })
-                })
+                    .fail(function (err) {
+                        console.log(err)
+                    })
 
-
-                $("#logout").on("click", function () {
-                    $(".inside").hide()
-                    $(".outside").show()
-                    localStorage.clear()
-                    // localStorage.removeItem("access_token")
-                })
             })
 
-
-            $('.edit_todo').on('submit', (event) => {
-                event.preventDefault
-                $('#edit-page').trigger('reset')
-                $.ajax(`${baseServer}/todos/${penampungId}`, {
-                    method : 'POST',
-                    headers : {
-                        access_token : localStorage.getItem('access_token')
-                    },
-                    data : {
-                        title: $('#title').val(),
-                        due_date: $('#due_date').val(),
-                        location: $('#location').val()
+            $(".btn-login").on("click", function (e) {
+                e.preventDefault()
+                const email = $("#email").val()
+                const password = $("#password").val()
+                //disini request server
+                $.ajax(`${baseUrl}/login`, {
+                    method: 'POST',
+                    data: {
+                        email,
+                        password
                     }
                 })
-                .done(result => {
-                    fetchTodo()
-                })
-                .fail(err => {
-                    console.log(err)
-                })
+                    .done(response => {
+                        localStorage.setItem("access_token", response.access_token)
+                        fetchRead()
+                        $("#plans-head").show()
+                        $("#todo").show()
+                        $(".logout").show()
+                        $("#login").hide()
+                        $("#register").hide()
+                        $("#signup").hide()
+                        $("#signin").hide()
+                        $(".create-todo").hide()
+                        $(".edit-todo").hide()
+                        $("#profile").show()
+                        $(".edit-profile").hide()
+
+                    })
+                    .fail(err => {
+                        console.log(err)
+                    })
+                    .always(_ => {
+                        $("#login").trigger("reset")
+                    })
             })
 
-        })
+            $("#logout").on("click", function () {
+                $("#plans-head").hide()
+                $("#todo").hide()
+                $(".logout").hide()
+                $("#login").hide()
+                $("#register").hide()
+                $(".signup").show()
+                $(".Signin").show()
+                $("#profile").hide()
+                $(".edit-profile").hide()
+                localStorage.clear()
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.signOut().then(function () {
+                    console.log('User signed out.');
+                });
+                // localStorage.removeItem("access_token")
+            })
+
+            $('#edit-submit').on('click', (event) => {
+                event.preventDefault
+                $('#edit-todo').trigger('reset')
+                $.ajax(`${baseUrl}/edit/${penampungId}`, {
+                    method: 'PUT',
+                    headers: {
+                        access_token: localStorage.getItem('access_token')
+                    },
+                    data: {
+                        title: $('#edit-title').val(),
+                        due_date: $('#edit-due_date').val(),
+                        location: $('#edit-location').val()
+                    }
+                })
+                    .done(result => {
+                        fetchRead()
+                        $("#plans-head").show()
+                        $("#todo").show()
+                        $("#login").hide()
+                        $("#register").hide()
+                        $("#signup").hide()
+                        $("#signin").hide()
+                        $(".create-todo").hide()
+                        $(".edit-todo").hide()
+                    })
+                    .fail(err => {
+                        console.log(err)
+                    })
+            })
+
+            $('#profile').on('click', function () {
+                getUser()
+            })
+
+            $("#editprof-submit").on('click', function (event) {
+                event.preventDefault
+
+                $.ajax(`${baseUrl}/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        access_token: localStorage.getItem('access_token')
+                    },
+                    data: {
+                        firstName: $('#edit-firstName').val(),
+                        lastName: $('#edit-lastName').val(),
+                        birthDate: $('#edit-birthDate').val()
+                    }
+                })
+                    .done(result => {
+                        getUser()
+                        $('.profile-page').show()
+                        $(".edit-profile").hide()
+                        $("#plans-head").hide()
+                        $("#todo").hide()
+                        $(".logout").hide()
+                        $("#login").hide()
+                        $("#register").hide()
+                        $("#signup").hide()
+                        $("#Signin").hide()
+                        $(".create-todo").hide()
+                        $(".edit-todo").hide()
+                        $("#profile").hide()
+                        $('#edit-profile').trigger('reset')
+                    })
+                    .fail(err => {
+                        console.log(err)
+                    })
+            })
         })
 
     </script>
 
 </body>
+
 </html>
