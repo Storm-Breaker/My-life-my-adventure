@@ -1,6 +1,17 @@
 const {Todo} = require('../models')
 
 class App{
+    static getTodos (req, res, next) {
+        Todo
+            .findAll()
+            .then(result => {
+                res.status(200).json(result)
+            })
+            .catch(err => {
+                next(err)
+            })
+    }
+
     static async create(req, res, next){
         const {title, location, due_date, weather, status} = req.body
         try {
@@ -16,6 +27,7 @@ class App{
     }        
 
    static async editAll (req, res, next){
+       console.log(req.body)
        const id = req.params.id
         try {
             const todo = await Todo.update ({
@@ -25,7 +37,6 @@ class App{
                 weather: req.body.weather,
                 status: req.body.status
             }, {where : {id}})
-            console.log(todo)
             res.status(200).json({todo})
         } catch (error) {
             next(error)
@@ -50,16 +61,25 @@ class App{
                 }
             }
         }catch(error){
-            next(err)
+            next(error)
         }
     }
-
 
     static async changeStatus (req, res, next) {
         try {
             const todo = await Todo.update({
-                status : req.body.status
-            })
+                status : `completed`
+            }, {where: {id : req.params.id}})
+            res.status(200).json({todo})
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async showEdit (req, res, next){
+        const id = req.params.id
+        try {
+            const todo = await Todo.findByPk(id)
             res.status(200).json({todo})
         } catch (error) {
             next(error)
