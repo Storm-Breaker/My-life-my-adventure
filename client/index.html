@@ -155,7 +155,7 @@
         function onSignIn(googleUser) {
             var id_token = googleUser.getAuthResponse().id_token
             $.ajax({
-                url: "http://localhost:3000/googleSignIn",
+                url: "http://localhost:3000/user/googleSignIn",
                 method: "POST",
                 headers: {
                     id_token: id_token
@@ -163,8 +163,9 @@
             })
                 .done(response => {
                     localStorage.setItem("token", response.token)
-                    $('.outside').hide()
-                    $('.inside').show()
+                    $('#login').hide()
+                    $('#register').hide()
+                    $('#todo').show()
                 })
 
                 .catch(err => {

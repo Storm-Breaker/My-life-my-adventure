@@ -55,6 +55,49 @@ class UserController {
         }
     }
 
+    static googleSignIn(req, res, next) {
+        console.log(`End Point Sign`)
+        const id_token = req.headers.id_token
+        let email
+        client.verifyIdToken({
+            idToken: id_token,
+            audience: CLIENT_ID
+        })
+        .then(ticket=>{
+            const payload = ticket.getPayload()
+            email = payload.email
+            // console.log(email)
+            return User.findOne({
+                where : {
+                    email
+                }
+            })
+           
+        })
+        .then(user=>{
+            console.log(user)
+            if(!user){
+                return User.create({
+                    email,
+                    password : SECRET_PASSWORD
+                })
+            }
+            else {
+               return user
+            }
+        })
+        .then(user =>{
+            const payload = { id: user.id, email:user.email }
+            const jwtToken = generateToken(payload)
+            return res.status(200).json({
+                token: jwtToken
+            })
+        })
+        .catch(err=>[
+            next(err)
+        ])
+    }
+
 }
 
 module.exports = UserController
