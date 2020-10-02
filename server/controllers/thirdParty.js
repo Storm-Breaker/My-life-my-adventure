@@ -53,7 +53,6 @@ class ThirdParty{
             responseType: 'json'
         })
         .then(function(response){
-            res.status(response.status).json(response.data.activity)
         })
         .catch(err => {
             next(err)

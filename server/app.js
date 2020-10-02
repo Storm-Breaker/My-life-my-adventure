@@ -1,4 +1,5 @@
 require('dotenv').config()
+const cors = require ('cors')
 const errorHandler = require ('./middlewares/errorHandler')
 const express = require ('express')
 const router = require ('./routes')
