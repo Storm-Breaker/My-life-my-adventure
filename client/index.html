@@ -399,12 +399,14 @@
                 $(".edit-todo").hide()
                 $("#profile").hide()
                 $(".edit-profile").hide()
+                $("#create-now").hide()
             } else if (!accessToken && registerKey && !createKey) {
                 $('.container-inside').hide()
                 $('#register').show()
                 $('.create-todo').hide()
                 $('.edit-todo').hide()
                 $("#profile").hide()
+                $("#create-now").hide()
             } else if (accessToken && !registerKey && !createKey) {
                 fetchRead()
                 $("#plans-head").show()
@@ -418,6 +420,7 @@
                 $(".edit-todo").hide()
                 $("#profile").show()
                 $(".edit-profile").hide()
+                $("#create-now").show()
             } else if (accessToken && !registerKey && createKey) {
                 fetchRead()
                 $("#plans-head").hide()
@@ -431,6 +434,7 @@
                 $(".edit-todo").hide()
                 $("#profile").hide()
                 $(".edit-profile").hide()
+                $("#create-now").hide()
             }
 
             $(".Signin").on("click", function () {
