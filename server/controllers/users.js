@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 
 class UserController {
     static async register (req, res, next){
+        console.log(req.body)
         const {firstName, lastName, email, password} = req.body
         try {
             const user = await User.create ({
@@ -21,6 +22,7 @@ class UserController {
     }
 
     static async login (req, res, next) {
+        console.log(req.body)
         const {email, password} = req.body
         try {
             const user = await User.findOne({
@@ -36,12 +38,12 @@ class UserController {
 
             const correctPassword = bcryptjs.compareSync(password, user.password)
             if (correctPassword){
-                const accessToken = jwt.sign({
+                const access_token = jwt.sign({
                     email : user.email,
                     id : user.id,
                 }, process.env.JWT_SECRET)
                 res.status(200).json ({
-                    accessToken
+                    access_token
                 })
             }
             else {
@@ -50,6 +52,30 @@ class UserController {
                 }
             }
 
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async getUser (req, res, next){
+        const id = req.decodedUser.id
+        try {
+            const user = await User.findByPk(id)
+                res.status(200).json(user)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    static async editProfile (req, res, next){
+        console.log(req.body)
+        try {
+            const user = await User.update({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                birthDate: req.body.birthDate
+            }, {where: {id : req.decodedUser.id}})
+            res.status(200).json(user)
         } catch (error) {
             next(error)
         }
