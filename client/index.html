@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id"
+        content="419148580155-l4a8am6ev1u521kdp14vjnuodvalob6m.apps.googleusercontent.com">
     <title>Avonturir</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -31,6 +33,9 @@
                     <li class="nav-item active">
                         <a class="nav-link Signin" href="#" data-toggle="modal" data-target="#signinModal"
                             id="signin">Signin</a>
+                    </li>
+                    <li>
+                        <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link profile" href="#" data-toggle="modal" data-target="#signinModal"
@@ -131,6 +136,7 @@
         </form>
     </div>
 
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -142,6 +148,36 @@
     <script>
         const baseUrl = `http://localhost:3000`
         let penampungId
+
+        function onSignIn(googleUser) {
+            var id_token = googleUser.getAuthResponse().id_token
+            $.ajax({
+                url: `${baseUrl}/googleSignIn`,
+                method: "POST",
+                headers: {
+                    id_token: id_token
+                }
+            })
+                .done(response => {
+                    localStorage.setItem("token", response.token)
+                    fetchRead()
+                    $("#plans-head").show()
+                    $("#todo").show()
+                    $(".logout").show()
+                    $("#login").hide()
+                    $("#register").hide()
+                    $("#signup").hide()
+                    $("#Signin").hide()
+                    $(".create-todo").hide()
+                    $(".edit-todo").hide()
+                    $("#profile").show()
+                    $(".edit-profile").hide()
+                })
+
+                .catch(err => {
+                    console.log(err, "error")
+                })
+        }
 
         function getUser() {
             $(".edit-profile").hide()
@@ -188,7 +224,6 @@
                 `August`, `September`, `October`,
                 `November`, `December`
             ]
-
 
             var d = new Date(date),
                 month = monthArr[(d.getMonth() + 1)],
@@ -252,16 +287,6 @@
                 .fail(err => {
                     console.log(err)
                 })
-        }
-
-        function showMainPage() {
-            $(".inside").show()
-            $(".outside").hide()
-        }
-
-        function showLogin() {
-            $(".inside").hide()
-            $(".outside").show()
         }
 
         function deletePlan(id) {
@@ -507,6 +532,10 @@
                 $("#profile").hide()
                 $(".edit-profile").hide()
                 localStorage.clear()
+                var auth2 = gapi.auth2.getAuthInstance();
+                auth2.signOut().then(function () {
+                    console.log('User signed out.');
+                });
                 // localStorage.removeItem("access_token")
             })
 

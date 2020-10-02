@@ -4,6 +4,7 @@ const UserController = require ('../controllers/users')
 const App = require('../controllers/app')
 const authentication = require('../middlewares/authentication')
 
+router.post(`/googleSignIn`, UserController.googleSignIn)
 router.post ('/register',confirmPassword, UserController.register)
 router.post ('/login', UserController.login)
 
