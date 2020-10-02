@@ -13,7 +13,20 @@ class App{
         }catch(error){
             next(error)
         }
-    }        
+    }
+    
+    static async fetch (req,res, next){
+        try {
+            const todo = await Todo.findAll({
+                where: { UserId: req.params.id },
+                order: [[`id`, `ASC`]]
+            })
+            res.status(200).json({ todo })
+        }
+        catch (err) {
+            next(err)
+        }
+    }
 
    static async editAll (req, res, next){
        const id = req.params.id

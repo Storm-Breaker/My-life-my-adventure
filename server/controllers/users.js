@@ -1,6 +1,12 @@
 const { User } = require ('../models')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const {OAuth2Client} = require('google-auth-library');
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const client = new OAuth2Client(CLIENT_ID);
+const { generateToken } = require('../helpers/jwt');
+const SECRET_PASSWORD = process.env.SECRET_PASSWORD
+
 
 class UserController {
     static async register (req, res, next){

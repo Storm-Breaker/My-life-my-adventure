@@ -91,7 +91,7 @@
     <script>
         const baseUrl = `http://localhost:3000`
         function fetchRead() {
-            $.ajax(`${baseURL}/....`, {
+            $.ajax(`${baseUrl}/....`, {
                 method: 'GET',
                 headers: {
                     access_token: localStorage.getItem('access_token')
@@ -129,7 +129,7 @@
         }
 
         function deletePlan(id) {
-            $.ajax(`${baseURL}/plans/${id}`, {
+            $.ajax(`${baseUrl}/app/${id}`, {
                 method: 'DELETE',
                 headers: {
                     access_token: localStorage.getItem("access_token")
@@ -143,19 +143,10 @@
                 })
         }
 
-        function createPlan() { //not done yet
-            $.ajax(`${baseUrl}/plans/`, {
-                method: `POST`,
-                headers: {
-
-                }
-            })
-        }
-
         function onSignIn(googleUser) {
             var id_token = googleUser.getAuthResponse().id_token
             $.ajax({
-                url: "http://localhost:3000/user/googleSignIn",
+                url: "http://localhost:3000/googleSignIn",
                 method: "POST",
                 headers: {
                     id_token: id_token
@@ -163,9 +154,9 @@
             })
                 .done(response => {
                     localStorage.setItem("token", response.token)
-                    $('#login').hide()
-                    $('#register').hide()
-                    $('#todo').show()
+                    fetchRead()
+                    $(".inside").show()
+                    $(".outside").hide()
                 })
 
                 .catch(err => {
@@ -202,7 +193,7 @@
                 const lastName = $("#lastName").val()
                 const email = $("#emailReg").val()
                 const password = $("#passwordReg").val()
-                $.ajax(`${baseURL}/register`, {
+                $.ajax(`${baseUrl}/register`, {
                     method: 'POST',
                     data: {
                         firstName,
@@ -223,7 +214,7 @@
                     const email = $("#email").val()
                     const password = $("#password").val()
                     //disini request server
-                    $.ajax(`${baseURL}/users`, {
+                    $.ajax(`${baseUrl}/users`, {
                         method: 'POST',
                         data: {
                             email,
@@ -232,7 +223,7 @@
                     })
                         .done(response => {
                             localStorage.setItem("access_token", response.access_token)
-                            fetchTodos()
+                            fetchRead()
                             $(".inside").show()
                             $(".outside").hide()
                         })
@@ -245,9 +236,15 @@
                 })
 
                 $("#logout").on("click", function () {
-                    $(".inside").hide()
-                    $(".outside").show()
+                    console.log(`this logout works`)
+                    $("#login").show()
+                    $("#register").hide()
+                    $("#todo").hide()
                     localStorage.clear()
+                    var auth2 = gapi.auth2.getAuthInstance();
+                    auth2.signOut().then(function () {
+                        console.log('User signed out.');
+                    });
                     // localStorage.removeItem("access_token")
                 })
             })
