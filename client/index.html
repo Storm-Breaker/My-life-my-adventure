@@ -88,16 +88,18 @@
     <!-- Read Form -->
     <div>
         <h1 id="plans-head"> Your Plans </h1>
+        <button id="create-now">Create Plan</button>
+        <br>
         <table id="todo" border="3px"></table>
     </div>
 
     <!-- create-page -->
     <div class="create-todo">
         <h1>Created Todo</h1>
-        <form>
+        <form id="create">
             <label for="title">Title</label><br>
             <input type="text" id="title"><br><br>
-            <label for="location"></label><br>
+            <label for="location">Location</label><br>
             <input type="location" id="location"><br><br>
             <label for="due_date">Due Date</label><br>
             <input type="date" id="due_date"><br><br>
@@ -407,7 +409,10 @@
         }
 
         $(document).ready(function () {
-            if (!localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
+            let accessToken = localStorage.getItem('access_token')
+            let registerKey = localStorage.getItem('register_key')
+            let createKey = localStorage.getItem('create_key')
+            if (!accessToken && !registerKey && !createKey) {
                 $("#plans-head").hide()
                 $("#todo").hide()
                 $(".logout").hide()
@@ -419,13 +424,15 @@
                 $(".edit-todo").hide()
                 $("#profile").hide()
                 $(".edit-profile").hide()
-            } else if (!localStorage.getItem('access_token') && localStorage.getItem('register_key')) {
+                $("#create-now").hide()
+            } else if (!accessToken && registerKey && !createKey) {
                 $('.container-inside').hide()
                 $('#register').show()
                 $('.create-todo').hide()
                 $('.edit-todo').hide()
                 $("#profile").hide()
-            } else if (localStorage.getItem('access_token') && !localStorage.getItem('register_key')) {
+                $("#create-now").hide()
+            } else if (accessToken && !registerKey && !createKey) {
                 fetchRead()
                 $("#plans-head").show()
                 $("#todo").show()
@@ -438,6 +445,21 @@
                 $(".edit-todo").hide()
                 $("#profile").show()
                 $(".edit-profile").hide()
+                $("#create-now").show()
+            } else if (accessToken && !registerKey && createKey) {
+                fetchRead()
+                $("#plans-head").hide()
+                $("#todo").hide()
+                $(".logout").show()
+                $("#login").hide()
+                $("#register").hide()
+                $("#signup").hide()
+                $("#Signin").hide()
+                $(".create-todo").show()
+                $(".edit-todo").hide()
+                $("#profile").hide()
+                $(".edit-profile").hide()
+                $("#create-now").hide()
             }
 
             $(".Signin").on("click", function () {
@@ -453,6 +475,13 @@
                 $("#register").show()
                 $("#todo").hide()
                 localStorage.setItem("register_key", "register")
+            })
+
+            $("#create-now").on("click",function() {
+                $("#plans-head").hide()
+                $("#todo").hide()
+                $(".create-todo").show()
+                localStorage.setItem("create_key", "create")
             })
 
             $("#register").on("submit", function (e) {
@@ -608,6 +637,39 @@
                     .fail(err => {
                         console.log(err)
                     })
+            })
+
+            $("#create").on("submit",function (e){
+                e.preventDefault()
+                const title = $("#title").val()
+                const location = $("#locatio").val()
+                const due_date = $("#due_date").val()
+            })
+            $.ajax(`${baseUrl}/apps`,{
+                method: 'POST',
+                data: {
+                    title,
+                    location,
+                    due_date
+                },
+                headers: {
+                    access_token: localStorage.getItem('access_token')
+                }
+            })
+            .done (res => {
+                localStorage.removeItem("create_key")
+                fetchRead()
+                $("#plans-head").show()
+                $("#todo").show()
+                $("#login").hide()
+                $("#register").hide()
+                $("#signup").hide()
+                $("#signin").hide()
+                $(".create-todo").hide()
+                $(".edit-todo").hide()
+            })
+            .fail (err => {
+                console.log (err)
             })
         })
 
