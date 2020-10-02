@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id"
+        content="419148580155-l4a8am6ev1u521kdp14vjnuodvalob6m.apps.googleusercontent.com">
     <title>Avonturir</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
@@ -12,7 +14,6 @@
 </head>
 
 <body>
-    <button id="profile-page">profile</button>
     <!-- Navbar -->
     <div class="container-nav">
 
@@ -30,6 +31,9 @@
                     <!-- not yet -->
                     <li class="nav-item active">
                         <a class="nav-link outside" href="#" data-toggle="modal" data-target="#signinModal">Signin</a>
+                    </li>
+                    <li>
+                        <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link inside" href="#" style="display:none" id="logout">Logout</a>
@@ -75,38 +79,7 @@
         <table id="todo" style="border-collapse: collapse;width: 70px;position: relative;left: 100px;"></table>
     </div>
 
-    <!-- create-page -->
-    <div class="create-todo">
-        <h1>Created Todo</h1>
-        <form>
-            <label for="title">Title</label><br>
-            <input type="text" id="title"><br><br>
-            <label for="location"></label><br>
-            <input type="location" id="location"><br><br>
-            <label for="due_date">Due Date</label><br>
-            <input type="date" id="due_date"><br><br>
-        </form>
-    </div>
-
-    <!-- edit-page -->
-    <div class="edit-todo">
-        <h1>Edit Your Todo</h1>
-        <form id="edit-page">
-            <label for="edit-title">Title</label><br>
-            <input type="text" id="edit-title"><br><br>
-            <label for="edit-location"></label><br>
-            <input type="location" id="edit-location"><br><br>
-            <label for="edit-due_date">Due Date</label><br>
-            <input type="date" id="edit-due_date"><br><br>
-            <input type="submit" val>
-        </form>
-    </div>
-
-    <!-- profile-page -->
-    <div class="profile-page">
-
-    </div>
-
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -117,8 +90,6 @@
 
     <script>
         const baseUrl = `http://localhost:3000`
-        let penampungId 
-
         function fetchRead() {
             $.ajax(`${baseURL}/....`, {
                 method: 'GET',
@@ -152,7 +123,6 @@
             $(".inside").show()
             $(".outside").hide()
         }
-        
         function showLogin() {
             $(".inside").hide()
             $(".outside").show()
@@ -182,30 +152,24 @@
             })
         }
 
-
-        function editTodo (id){
-            $("#login").hide()
-            $("#register").hide()
-            $("#todo").hide()
-            $('.create-todo').hide()
-            $('.edit-todo').show()
-            penampungId = id
-
-            $.ajax(`${baseUrl}/edit/${id}`, {
-                method : 'GET',
-                headers : {
-                    access_token : localStorage.getItem('access_token')
+        function onSignIn(googleUser) {
+            var id_token = googleUser.getAuthResponse().id_token
+            $.ajax({
+                url: "http://localhost:3000/googleSignIn",
+                method: "POST",
+                headers: {
+                    id_token: id_token
                 }
             })
-            .done(result => {
-                localStorage.setItem('current_id', result.todo.id)
-                $("#edit-title").val(result.todo.title)
-                $("#edit-due_date").val(formatDate(result.todo.due_date))
-                $("#edit-location").val(result.todo.location)
-            })
-            .fail(err => {
-                throw err
-            })
+                .done(response => {
+                    localStorage.setItem("token", response.token)
+                    $('.outside').hide()
+                    $('.inside').show()
+                })
+
+                .catch(err => {
+                    console.log(err, "error")
+                })
         }
 
         $(document).ready(function () {
@@ -224,7 +188,6 @@
                 $("#todo").show()
             }
 
-
             $("#to-register").on("click", function () {
                 $("#login").hide()
                 $("#register").show()
@@ -238,26 +201,22 @@
                 const lastName = $("#lastName").val()
                 const email = $("#emailReg").val()
                 const password = $("#passwordReg").val()
-
-
                 $.ajax(`${baseURL}/register`, {
                     method: 'POST',
                     data: {
                         firstName,
                         lastName,
                     }
+                        .done(function (res) {
+                            localStorage.removeItem("register_key")
+                            $("#login").show()
+                            $("#register").hide()
+                            $("#todo").hide()
+                        })
+                        .fail(function (err) {
+                            console.log(err)
+                        })
                 })
-                .done(function (res) {
-                    localStorage.removeItem("register_key")
-                    $("#login").show()
-                    $("#register").hide()
-                    $("#todo").hide()
-                })
-                .fail(function (err) {
-                    console.log(err)
-                })
-              })
-  
                 $("#login").on("submit", function (e) {
                     e.preventDefault()
                     const email = $("#email").val()
@@ -284,7 +243,6 @@
                         })
                 })
 
-
                 $("#logout").on("click", function () {
                     $(".inside").hide()
                     $(".outside").show()
@@ -292,34 +250,8 @@
                     // localStorage.removeItem("access_token")
                 })
             })
-
-
-            $('.edit_todo').on('submit', (event) => {
-                event.preventDefault
-                $('#edit-page').trigger('reset')
-                $.ajax(`${baseServer}/todos/${penampungId}`, {
-                    method : 'POST',
-                    headers : {
-                        access_token : localStorage.getItem('access_token')
-                    },
-                    data : {
-                        title: $('#title').val(),
-                        due_date: $('#due_date').val(),
-                        location: $('#location').val()
-                    }
-                })
-                .done(result => {
-                    fetchTodo()
-                })
-                .fail(err => {
-                    console.log(err)
-                })
-            })
-
         })
-        })
-
     </script>
-
 </body>
+
 </html>
