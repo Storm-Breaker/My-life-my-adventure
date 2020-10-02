@@ -37,6 +37,7 @@ class App{
                 weather: req.body.weather,
                 status: req.body.status
             }, {where : {id}})
+            
             res.status(200).json({todo})
         } catch (error) {
             next(error)
@@ -85,6 +86,7 @@ class App{
             next(error)
         }
     }
+
 }
 
 module.exports = App
